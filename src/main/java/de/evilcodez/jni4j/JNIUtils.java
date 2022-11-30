@@ -63,6 +63,10 @@ public final class JNIUtils {
             if (method == null) sneakThrow(new NoSuchMethodError("Failed to find dummy method"));
             final Callback cb = new Callback() {
                 public void callback(Pointer envPtr, Pointer clazz, Pointer obj) {
+                    if (obj == null) {
+                        LOCAL.set(null);
+                        return;
+                    }
                     final JNIEnv env = new JNIEnv(envPtr);
                     LOCAL.set(env.NewGlobalRef(obj));
                 }
@@ -78,7 +82,9 @@ public final class JNIUtils {
             }
         }
         dummy2(obj);
-        final Pointer ret = env.NewLocalRef((Pointer) LOCAL.get());
+        Pointer ret = (Pointer) LOCAL.get();
+        if (ret == null) return null;
+        ret = env.NewLocalRef(ret);
         env.DeleteGlobalRef((Pointer) LOCAL.get());
         LOCAL.set(null);
         return ret;
