@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group 'de.evilcodez'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation apiElements('net.java.dev.jna:jna:5.12.1')
+}
