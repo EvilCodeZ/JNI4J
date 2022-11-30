@@ -2,6 +2,7 @@ package de.evilcodez.jni4j;
 
 import com.sun.jna.*;
 import com.sun.jna.ptr.PointerByReference;
+import de.evilcodez.jni4j.structs.JNINativeMethod;
 
 import java.lang.annotation.*;
 import java.lang.reflect.Method;
@@ -71,7 +72,7 @@ public final class JNIUtils {
                     LOCAL.set(env.NewGlobalRef(obj));
                 }
             };
-            final JVM.JNINativeMethod methodEntry = new JVM.JNINativeMethod(method.getName(), "(Ljava/lang/Object;)V", CallbackReference.getFunctionPointer(cb));
+            final JNINativeMethod methodEntry = new JNINativeMethod(method.getName(), "(Ljava/lang/Object;)V", CallbackReference.getFunctionPointer(cb));
             methodEntry.write();
             final Pointer thisClass = env.NewGlobalRef(env.FindClass(JNIUtils.class.getName().replace('.', '/')));
             try {

@@ -1,6 +1,7 @@
 package de.evilcodez.jni4j;
 
-import com.sun.jna.*;
+import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.StdCallLibrary;
@@ -318,64 +319,4 @@ public interface JVM extends StdCallLibrary {
     int JNI_CreateJavaVM(PointerByReference vm, PointerByReference env, Pointer args);
 
     int JNI_GetCreatedJavaVMs(Pointer vmBuf, int bufLen, IntByReference nVMs);
-
-    @Structure.FieldOrder({"version", "nOptions", "options", "ignoreUnrecognized"})
-    class JavaVMInitArgs extends Structure {
-        int version;
-        int nOptions;
-        Pointer options;
-        boolean ignoreUnrecognized;
-
-        public JavaVMInitArgs() {}
-
-        public JavaVMInitArgs(Pointer p) {
-            super(p);
-            this.read();
-        }
-
-        public JavaVMInitArgs(int version, int nOptions, Pointer options, boolean ignoreUnrecognized) {
-            this.version = version;
-            this.nOptions = nOptions;
-            this.options = options;
-            this.ignoreUnrecognized = ignoreUnrecognized;
-        }
-    }
-
-    @Structure.FieldOrder({"optionString", "extraInfo"})
-    class JavaVMOption extends Structure {
-        String optionString;
-        Pointer extraInfo;
-
-        public JavaVMOption() {}
-
-        public JavaVMOption(Pointer p) {
-            super(p);
-            this.read();
-        }
-
-        public JavaVMOption(String optionString, Pointer extraInfo) {
-            this.optionString = optionString;
-            this.extraInfo = extraInfo;
-        }
-    }
-
-    @Structure.FieldOrder({"name", "signature", "fnPtr"})
-    class JNINativeMethod extends Structure {
-        public String name;
-        public String signature;
-        public Pointer fnPtr;
-
-        public JNINativeMethod() {}
-
-        public JNINativeMethod(Pointer p) {
-            super(p);
-            this.read();
-        }
-
-        public JNINativeMethod(String name, String signature, Pointer fnPtr) {
-            this.name = name;
-            this.signature = signature;
-            this.fnPtr = fnPtr;
-        }
-    }
 }
