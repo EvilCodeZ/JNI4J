@@ -1,12 +1,12 @@
 package de.evilcodez.jni4j;
 
+import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
-import com.sun.jna.win32.StdCallLibrary;
 
-public interface JVM extends StdCallLibrary {
+public interface JVM extends Library {
 
     JVM INSTANCE = Native.load("jvm", JVM.class);
 

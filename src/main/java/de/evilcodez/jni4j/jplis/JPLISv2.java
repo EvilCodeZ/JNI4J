@@ -1,10 +1,11 @@
-package de.evilcodez.jni4j;
+package de.evilcodez.jni4j.jplis;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
+import de.evilcodez.jni4j.*;
 import de.evilcodez.jni4j.structs.JPLISAgent;
 import de.evilcodez.jni4j.structs.JPLISEnvironment;
 import de.evilcodez.jni4j.structs.JvmtiCapabilities;
@@ -14,14 +15,12 @@ import java.lang.instrument.Instrumentation;
 import java.util.function.Function;
 
 /**
- * NOT WORKING YET
+ * NOT WORKING
  */
-public class JPLIS implements AutoCloseable {
+public class JPLISv2 implements AutoCloseable {
 
     private static final Pointer JPLIS_CURRENTLY_INSIDE_TOKEN = new Pointer(0x7EFFC0BBL);
     private static final Pointer JPLIS_CURRENTLY_OUTSIDE_TOKEN = new Pointer(0L);
-
-    private final ThreadLocal<Boolean> currentlyInside = ThreadLocal.withInitial(() -> false);
 
     private final JavaVM javaVM;
     private final JVMTI jvmti;
@@ -30,7 +29,7 @@ public class JPLIS implements AutoCloseable {
     private Instrumentation instrumentation;
     private boolean closed;
 
-    public JPLIS(Pointer javaVM, boolean canRedefineClasses, boolean canRetransformClasses, boolean canSetNativeMethodPrefix, boolean canMaintainOriginalMethodOrder) {
+    public JPLISv2(Pointer javaVM, boolean canRedefineClasses, boolean canRetransformClasses, boolean canSetNativeMethodPrefix, boolean canMaintainOriginalMethodOrder) {
         this.javaVM = new JavaVM(javaVM);
         this.jvmti = JVMTI.getThreadEnv(this.javaVM, JVM.JVMTI_VERSION_1_1);
         final PointerByReference agentPtr = new PointerByReference();
@@ -188,10 +187,6 @@ public class JPLIS implements AutoCloseable {
     }
 
     private void eventHandlerClassFileLoadHook(Pointer jvmtiEnv, Pointer jniEnv, Pointer classBeingRedefined, Pointer loader, String name, Pointer protectionDomain, int classDataLen, Pointer classData, IntByReference newClassDataLen, PointerByReference newClassData) {
-        System.out.println("ClassFileLoadHook: " + name);
-        if (currentlyInside.get()) return;
-        currentlyInside.set(true);
-        System.out.println("PUSH Transforming " + name + "...");
         final JVMTI jvmti = new JVMTI(jvmtiEnv);
         final JNIEnv jni = new JNIEnv(jniEnv);
         try {
@@ -214,15 +209,12 @@ public class JPLIS implements AutoCloseable {
             }
         } catch (Throwable e) {
             e.printStackTrace();
-        } finally {
-            currentlyInside.set(false);
         }
-        System.out.println("POP Transforming " + name + "...");
     }
 
     private void transformClassFile(JNIEnv jni, Pointer classBeingRedefined, Pointer loader, String name, Pointer protectionDomain, int classDataLen, Pointer classData, IntByReference newClassDataLen, PointerByReference newClassData, boolean isRetransformer) {
-//        final boolean shouldRun = tryToAcquireReentrancyToken(jvmti, null);
-//        if (!shouldRun) return;
+        final boolean shouldRun = tryToAcquireReentrancyToken(jvmti, null);
+        if (!shouldRun) return;
         final Pointer classNameStringObject = name == null ? null : jni.NewGlobalRef(jni.NewStringUTF(name));
         final Pointer classFileBufferObject = jni.NewGlobalRef(jni.NewByteArray(classDataLen));
         try {
@@ -264,7 +256,7 @@ public class JPLIS implements AutoCloseable {
             jni.DeleteGlobalRef(classFileBufferObject);
             if (classNameStringObject != null) jni.DeleteGlobalRef(classNameStringObject);
         }
-//        releaseReentrancyToken(jvmti, null);
+        releaseReentrancyToken(jvmti, null);
     }
 
     private boolean tryToAcquireReentrancyToken(JVMTI jvmti, Pointer thread) {
@@ -287,7 +279,6 @@ public class JPLIS implements AutoCloseable {
         final PointerByReference storedValue = new PointerByReference();
         storedValue.setPointer(new Pointer(0x99999999L));
         this.err(jvmti.GetThreadLocalStorage(thread, storedValue));
-        System.out.println("TLS value: " + storedValue.getValue() + ", expected: " + expected);
         if (!storedValue.getValue().equals(expected)) {
             throw new IllegalStateException("TLS value is " + storedValue.getValue() + ", expected " + expected);
         }

@@ -253,7 +253,7 @@ public class JNIEnv {
         for (int i = 0; i < NumberOfFunctions; i++) {
             final Pointer functionPointer = funcs.getPointer((long) i * addressSize);
             if (functionPointer == null) continue;
-            functions[i] = Function.getFunction(functionPointer, Function.ALT_CONVENTION);
+            functions[i] = Function.getFunction(functionPointer);
         }
     }
 

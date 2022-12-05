@@ -17,8 +17,8 @@ public class JPLISAgent extends Structure {
     public boolean mRedefineAdded;
     public boolean mNativeMethodPrefixAvailable;
     public boolean mNativeMethodPrefixAdded;
-    public String mAgentClassName;
-    public String mOptionsString;
+    public Pointer mAgentClassName;
+    public Pointer mOptionsString;
 
     public JPLISAgent() {}
 
