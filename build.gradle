@@ -10,6 +10,6 @@ repositories {
 }
 
 dependencies {
-    implementation apiElements('net.java.dev.jna:jna:5.12.1')
+    implementation apiElements('net.java.dev.jna:jna:5.13.0')
     implementation apiElements('net.java.dev.jna:jna-platform:5.12.1')
 }
